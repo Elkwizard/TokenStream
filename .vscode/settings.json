@@ -1,0 +1,7 @@
+{
+	"files.associations": {
+		"*.txt": "pipelang",
+		"xstring": "cpp",
+		"regex": "cpp"
+	}
+}

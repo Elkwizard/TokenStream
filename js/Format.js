@@ -1,5 +1,5 @@
 const { color, background, indent } = (() => {
-	const COLOR_OFFSET = 30;
+	const FOREGROUND_OFFSET = 30;
 	const BACKGROUND_OFFSET = 40;
 	const COLOR_MAP = {
 		"black": 0,

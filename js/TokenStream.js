@@ -84,12 +84,6 @@ class TokenStream {
 		return false;
 	}
 
-	type(type, index = 0) {
-		if (index >= this.tokens.length)
-			return false;
-		return this.tokens[this.tokens.length - index - 1].type === type;
-	}
-
 	get(index = 0) {
 		if (index >= this.tokens.length)
 			throw new RangeError("Desired index is out of bounds");
