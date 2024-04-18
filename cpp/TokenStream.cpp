@@ -22,7 +22,7 @@ namespace TokenStream {
 			std::string* source;
 
 			Token(
-				const std::string& _content, Type _type,
+				const std::string& _content, T _type,
 				size_t _position, std::string* _source
 			) {
 				content = _content;
@@ -31,10 +31,10 @@ namespace TokenStream {
 				source = _source;
 			}
 
-			Token(const std::string& content, Type type)
+			Token(const std::string& content, T type)
 			 : Token(content, type, 0, nullptr) { }
 
-			Token plus(const Token& token, Type type) const {
+			Token plus(const Token& token, T type) const {
 				return { content + token.content, type, position, source };
 			}
 
@@ -120,7 +120,7 @@ namespace TokenStream {
 				return tokens[getIndex()].content == content;
 			}
 
-			bool has(Type type, size_t index = 0) const {
+			bool has(T type, size_t index = 0) const {
 				if (index >= tokens.size())
 					return false;
 
@@ -159,7 +159,7 @@ namespace TokenStream {
 				});
 			}
 
-			void remove(Type content) {
+			void remove(T content) {
 				std::remove_if(tokens.begin(), tokens.end(), [&](const Token& tok) {
 					return tok.type == type;
 				})
@@ -184,7 +184,7 @@ namespace TokenStream {
 				return tok.content;
 			}
 
-			std::string next(Type type) {
+			std::string next(T type) {
 				Token tok = nexToken();
 				if (tok.type != type) {
 					std::stringstream stream = "Unexpected token '" + tok.content + "', expected '";
@@ -280,7 +280,7 @@ namespace TokenStream {
 				return { tokens };
 			}
 
-			void append(std::string content, Type type) {
+			void append(std::string content, T type) {
 				size_t position = source.find(content, index);
 				index = position + content.length;
 				tokens.emplace(content, type, position, source);
@@ -288,7 +288,7 @@ namespace TokenStream {
 
 			static TokenStream<T> regex(
 				const std::string& source,
-				const std::unordered_map<std::regex, Type> regexes
+				const std::unordered_map<std::regex, T> regexes
 			) {
 				TokenStreamBuilder builder { source };
 
