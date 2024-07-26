@@ -21,7 +21,7 @@ const { color, background, indent } = (() => {
 	};
 	
 	function color(name, text) {
-		const code = COLOR_MAP[name] + COLOR_OFFSET;
+		const code = COLOR_MAP[name] + FOREGROUND_OFFSET;
 		return `\x1b[${code}m${text}\x1b[0m`;
 	}
 

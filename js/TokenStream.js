@@ -25,10 +25,18 @@ class Token {
 		for (let i = 0; i < this.position; i++)
 			if (this.source[i] === "\n") index++;
 		
-		const excerpt = lines.slice(
-			Math.max(0, index - 1),
+		const startIndex = Math.max(0, index - 1);
+
+		const excerptLines = lines.slice(
+			startIndex,
 			Math.min(lines.length, index + 2)
-		).join("\n");
+		);
+
+		const maxWidth = String(excerptLines.length + startIndex).length;
+
+		const excerpt = excerptLines
+			.map((line, i) => `${String(i + startIndex + 1).padStart(maxWidth)} | ${line}`)
+			.join("\n");
 
 		const bar = "=".repeat(40);
 		console.log(`\n\n${bar}\n${excerpt}\n${bar}\n${message} (line ${index + 1})\n\n`);
@@ -85,9 +93,13 @@ class TokenStream {
 	}
 
 	get(index = 0) {
+		return this.getToken(index).content;
+	}
+
+	getToken(index = 0) {
 		if (index >= this.tokens.length)
 			throw new RangeError("Desired index is out of bounds");
-		return this.tokens[this.tokens.length - index - 1].content;
+		return this.tokens[this.tokens.length - index - 1];
 	}
 
 	skip(amount) {
@@ -154,7 +166,7 @@ class TokenStream {
 
 		this.until(open);
 		if (!this.tokens.length)
-			throw new RangeError("The specified boundaries don't exist");
+			throw new RangeError(`The specified boundaries "${open}${close}" don't exist`);
 		this.next();
 
 		let depth = 1;
