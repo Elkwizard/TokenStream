@@ -5,6 +5,17 @@ class Token {
 		this.position = position;
 		this.source = source;
 	}
+	
+	get location() {
+		if (!this._location) {
+			const before = this.source.slice(0, this.position);
+			const line = (before.match(/\n/g)?.length ?? 0) + 1;
+			const column = before.match(/.*$/)[0].length;
+			this._location = { line, column };
+		}
+
+		return this._location;
+	}
 
 	plus(token, type) {
 		return new Token(
@@ -39,8 +50,8 @@ class Token {
 			.join("\n");
 
 		const bar = "=".repeat(40);
-		console.log(`\n\n${bar}\n${excerpt}\n${bar}\n${message} (line ${index + 1})\n\n`);
-		throw new SyntaxError(message);
+		const output = `\n\n${bar}\n${excerpt}\n${bar}\n${message} (line ${index + 1})\n\n`;
+		throw new SyntaxError(output);
 		// throw new SyntaxError(message + "\n\n" + excerpt);
 	}
 
@@ -92,12 +103,12 @@ class TokenStream {
 		return false;
 	}
 
-	get(index = 0) {
-		return this.getToken(index).content;
+	get(index, quiet) {
+		return this.getToken(index, quiet).content;
 	}
 
-	getToken(index = 0) {
-		if (index >= this.tokens.length)
+	getToken(index = 0, quiet = false) {
+		if (index >= this.tokens.length && !quiet)
 			throw new RangeError("Desired index is out of bounds");
 		return this.tokens[this.tokens.length - index - 1];
 	}
@@ -221,16 +232,20 @@ class TokenStreamBuilder {
 	static regex(source, regexes) {
 		const builder = new TokenStreamBuilder(source);
 
-		while (source.length) {
+		tokenize: while (source.length) {
 			source = source.replace(/^\s*/, "");
 			for (let i = 0; i < regexes.length; i++) {
-				const [regex, type] = regexes[i];
+				const [regex, type, assert] = regexes[i];
 				if (regex.test(source)) {
-					builder.append(source.match(regex)[0], type);
-					source = source.replace(regex, "");
-					break;
+					const content = source.match(regex)[0];
+					if (assert && !assert(content, builder.tokens)) continue;
+					builder.append(content, type);
+					source = source.slice(content.length);
+					continue tokenize;
 				}
 			}
+
+			if (source.length) throw new SyntaxError(`Tokenization failed at position ${builder.index}: '${source[0]}'`);
 		}
 
 		return builder.stream;
